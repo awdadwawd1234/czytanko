@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Program Czytanko 📖</title>
+    <style>
+        body {
+            font-family: 'Comic Sans MS', 'Segoe UI', cursive, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background: linear-gradient(135deg, #FFDEE9 0%, #B5FFFC 100%);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+            text-align: center;
+            border: 8px solid #FF7EB3;
+        }
+        .controls {
+            margin-bottom: 2rem;
+            text-align: left;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #FFF0F5;
+            padding: 20px;
+            border-radius: 20px;
+            border: 2px dashed #FF7EB3;
+        }
+        .speed-control {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .speed-label {
+            font-weight: bold;
+            color: #D81B60;
+            font-size: 1.1rem;
+        }
+        input[type="range"] {
+            width: 100%;
+            cursor: pointer;
+            accent-color: #FF7EB3;
+        }
+        .speed-labels {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 5px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: #FF7EB3;
+        }
+        h1 { 
+            color: #FF4081;
+            margin-top: 0;
+            font-size: 2.2rem;
+            text-shadow: 2px 2px #FFF;
+        }
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 20px;
+            border: 4px solid #B5FFFC;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            resize: none;
+            box-sizing: border-box;
+            margin-bottom: 2rem;
+            background-color: #F0FBFF;
+            transition: border-color 0.3s;
+        }
+        textarea:focus {
+            outline: none;
+            border-color: #FF7EB3;
+        }
+        button {
+            background: linear-gradient(to bottom, #FF4081, #D81B60);
+            color: white;
+            border: none;
+            padding: 20px;
+            font-size: 1.4rem;
+            font-weight: 800;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            width: 100%;
+            box-shadow: 0 6px #AD1457;
+            text-transform: uppercase;
+        }
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px #AD1457;
+        }
+        button:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px #AD1457;
+        }
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+                border-width: 5px;
+            }
+            h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Program Czytanko 📖</h1>
+        
+        <div class="controls">
+            <div class="speed-control">
+                <label class="speed-label" for="speed-range">Prędkość czytania 🐢🚀</label>
+                <input type="range" id="speed-range" min="0.2" max="1.5" step="0.1" value="0.7">
+                <div class="speed-labels">
+                    <span>Bardzo wolno</span>
+                    <span>Normalnie</span>
+                    <span>Szybko</span>
+                </div>
+            </div>
+        </div>
+
+        <textarea id="text-input" placeholder="Wpisz tutaj zdanie, które AI ma przeczytać..."></textarea>
+        <br>
+        <button id="speak-btn">Przeczytaj tekst</button>
+    </div>
+
+    <script>
+        const speakBtn = document.getElementById('speak-btn');
+        const textInput = document.getElementById('text-input');
+        const speedRange = document.getElementById('speed-range');
+
+        let voices = [];
+
+        function loadVoices() {
+            voices = window.speechSynthesis.getVoices();
+        }
+
+        loadVoices();
+        if (speechSynthesis.onvoiceschanged !== undefined) {
+            speechSynthesis.onvoiceschanged = loadVoices;
+        }
+
+        // Funkcja czytająca tekst
+        function handleSpeak() {
+            const text = textInput.value.trim();
+            
+            if (text !== "") {
+                window.speechSynthesis.cancel();
+
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'pl-PL';
+                utterance.rate = speedRange.value;
+                
+                const polishVoices = voices.filter(v => v.lang.includes('PL'));
+                const bestVoice = polishVoices.find(v => v.name.includes('Natural')) || 
+                                  polishVoices.find(v => v.name.includes('Google')) || 
+                                  polishVoices[0];
+                if (bestVoice) utterance.voice = bestVoice;
+
+                window.speechSynthesis.speak(utterance);
+            } else if (text === "") {
+                // Nie wyświetlamy alertu przy Enterze, żeby nie przeszkadzać
+            }
+        }
+
+        speakBtn.addEventListener('click', handleSpeak);
+
+        // Obsługa klawisza Enter
+        textInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); // Zapobiega nowej linii
+                handleSpeak();
+            }
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "ai-voice-reader",
+  "version": "1.0.0",
+  "description": "Aplikacja do czytania tekstu AI",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build": "electron-packager . AI-Voice-Reader --platform=win32 --arch=x64 --out=dist"
+  },
+  "devDependencies": {
+    "electron": "^25.0.0",
+    "electron-packager": "^17.1.1"
+  }
+}
